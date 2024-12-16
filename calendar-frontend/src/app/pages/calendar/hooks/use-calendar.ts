@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import moment, { unitOfTime, Moment } from 'moment/moment';
 import { View } from 'react-big-calendar';
-import { EltEvent } from '../../../common/types';
+import { EltEvent, ErrorMessage } from '../../../common/types';
 import { CalendarService } from '../../../service/calendar.service';
+import { AxiosError } from 'axios';
 
 export const useCalendar = () => {
   const calendarService = new CalendarService();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [events, setEvents] = useState<EltEvent[]>([]);
   const [showIds, setShowIds] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EltEvent | undefined>();
@@ -16,7 +19,9 @@ export const useCalendar = () => {
   }, []);
 
   const fetchEvents = async (start: Moment, end: Moment) => {
+    setLoading(true)
     const { data } = await calendarService.getEventsForRange(start, end);
+    setLoading(false)
     const processedEvents: EltEvent[] = data.map((e) => ({
       id: e.id,
       title: e.name,
@@ -36,6 +41,7 @@ export const useCalendar = () => {
   };
 
   const addEvent = async (event: Omit<EltEvent, 'id'>) => {
+    setLoading(true)
     const {
       data: { id },
     } = await calendarService.createEvent(
@@ -43,7 +49,26 @@ export const useCalendar = () => {
       moment(event.start),
       moment(event.end),
     );
+    setLoading(false)
     setEvents((events) => [...events, { ...event, id }]);
+  };
+
+  const updateEvent = async (event: EltEvent) => {
+    try {
+      setLoading(true)
+      const {
+        data,
+      } = await calendarService.updateEvent(
+        event.id,
+        event.title,
+        moment(event.start),
+        moment(event.end),
+      );
+      setEvents((events) => [...events.filter(event => event.id !== data.updated_id), { ...event, id: data.updated_id }]);
+    } catch (error) {
+      setError(((error as AxiosError).response?.data as ErrorMessage).message)
+    }
+    setLoading(false)
   };
 
   const viewToUnitOfTime = (view: View): unitOfTime.StartOf => {
@@ -61,10 +86,15 @@ export const useCalendar = () => {
 
   return {
     events,
+    loading,
+    setLoading,
+    error,
+    setError,
     showIds,
     setShowIds,
     onNavigate,
     addEvent,
+    updateEvent,
     selectedEvent,
     setSelectedEvent,
   };

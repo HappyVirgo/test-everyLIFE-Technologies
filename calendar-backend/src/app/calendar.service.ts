@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CalendarEventRepository } from '@fs-tech-test/calendar-domain';
+import { wrap } from '@mikro-orm/mysql';
 
 @Injectable()
 export class CalendarService {
@@ -17,6 +18,7 @@ export class CalendarService {
   }
 
   async addEvent(payload: EventPayload) {
+    if ((await this.getEvents(payload.start, payload.end)).length > 0) throw new BadRequestException('Date conflicts!');
     const newEntity = await this.calendarEventRepository.createNewEvent(
       payload.name,
       new Date(payload.start),
@@ -24,6 +26,18 @@ export class CalendarService {
     );
 
     return newEntity.id;
+  }
+
+  async updateEvent(id: number, payload: EventPayload) {
+    if ((await this.getEvents(payload.start, payload.end)).length > 0) throw new BadRequestException('Date conflicts!');
+    const updatedEntity = await this.calendarEventRepository.updateEvent(
+      id,
+      payload.name,
+      new Date(payload.start),
+      new Date(payload.end),
+    );
+
+    return updatedEntity.id;
   }
 
   async deleteEvent(id: number) {

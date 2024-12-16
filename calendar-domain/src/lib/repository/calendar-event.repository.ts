@@ -1,5 +1,5 @@
 import { CalendarEventEntity } from '../entity/calendar-event.entity';
-import { EntityRepository } from '@mikro-orm/mysql';
+import { EntityRepository, wrap } from '@mikro-orm/mysql';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -20,6 +20,20 @@ export class CalendarEventRepository extends EntityRepository<CalendarEventEntit
     await this.insert(newEntity);
 
     return newEntity;
+  }
+
+  async updateEvent(
+    id: number,
+    name: string,
+    start: Date,
+    end: Date,
+  ): Promise<CalendarEventEntity> {
+    const updatedEntity = await this.findOneOrFail(id);
+
+    wrap(updatedEntity).assign({name, start, end});
+    await this.em.flush();
+
+    return updatedEntity;
   }
 
   async deleteById(id: number): Promise<void> {

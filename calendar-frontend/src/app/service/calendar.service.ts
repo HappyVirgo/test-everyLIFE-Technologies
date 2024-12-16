@@ -24,4 +24,17 @@ export class CalendarService extends ApiService {
       end: end.toISOString(),
     });
   }
+
+  async updateEvent(
+    id: number,
+    title: string,
+    start: Moment,
+    end: Moment
+  ): Promise<AxiosResponse<{ message: string; updated_id: number }>> {
+    return this._axios.put(`/api/calendar/update-event/${id}`, {
+      name: title,
+      start: start.toISOString(),
+      end: end.toISOString(),
+    });
+  }
 }
