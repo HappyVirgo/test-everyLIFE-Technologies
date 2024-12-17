@@ -1,8 +1,29 @@
-$event-bg: #6d1b98;
-$event-border: #4e136d;
+$event-bg: #6A9AB0;
+$event-border: none;
 $event-outline: lighten($event-bg, 10%);
 
 $today-highlight-bg: #f8f4ff;
-
 @import '../../../../../../../../node_modules/react-big-calendar/lib/sass/styles';
 @import '../../../../../../../../node_modules/react-big-calendar/lib/addons/dragAndDrop/styles.css';
+
+
+.rbc-day-slot .rbc-event, .rbc-day-slot .rbc-background-event {
+    border-left: 10px solid #3A6D8C;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rbc-day-slot .rbc-event-content, .rbc-day-slot .rbc-background-event-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-resize-ns-anchor:first-child {
+    display: flex;
+    flex-direction: column;
+}

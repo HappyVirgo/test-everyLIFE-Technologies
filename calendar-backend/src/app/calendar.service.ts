@@ -29,7 +29,8 @@ export class CalendarService {
   }
 
   async updateEvent(id: number, payload: EventPayload) {
-    if ((await this.getEvents(payload.start, payload.end)).length > 0) throw new BadRequestException('Date conflicts!');
+    let existEvents = await this.getEvents(payload.start, payload.end);
+    if (existEvents.filter(e => e.id != id).length > 0) throw new BadRequestException('Date conflicts!');
     const updatedEntity = await this.calendarEventRepository.updateEvent(
       id,
       payload.name,
