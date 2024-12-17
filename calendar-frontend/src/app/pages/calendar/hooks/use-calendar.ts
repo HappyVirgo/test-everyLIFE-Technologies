@@ -42,15 +42,19 @@ export const useCalendar = () => {
 
   const addEvent = async (event: Omit<EltEvent, 'id'>) => {
     setLoading(true)
-    const {
-      data: { id },
-    } = await calendarService.createEvent(
-      event.title,
-      moment(event.start),
-      moment(event.end),
-    );
+    try {
+      const {
+        data: { id },
+      } = await calendarService.createEvent(
+        event.title,
+        moment(event.start),
+        moment(event.end),
+      );
+      setEvents((events) => [...events, { ...event, id }]);
+    } catch(error) {
+      setError(((error as AxiosError).response?.data as ErrorMessage).message)
+    }
     setLoading(false)
-    setEvents((events) => [...events, { ...event, id }]);
   };
 
   const updateEvent = async (event: EltEvent) => {
